@@ -1,0 +1,36 @@
+# versionは、3系
+version: '3'
+# Serviceを設定する
+services:
+  # Service名は、自由に決めていい
+  frontend:
+    # DockerfileまでのPath
+    build: .
+    # 環境変数を定義する
+    environment:
+      # Node.jsのグローバル変数: 開発用途なのでdevelopmentを指定
+      - NODE_ENV=development
+    # ホストマシン:コンテナ => ファイルを共有するための設定
+    volumes:
+      - ./:/usr/src/app
+    # Dockerコンテナ内で実行されるコマンドを指定する
+    command: sh -c 'cd frontend && yarn start'
+    # ホストマシンPort番号:コンテナのPost番号
+    ports:
+      - 8002:3000
+    # CLI画面の操作をできるようにする
+    tty: true
+    # Containerが接続するNetworkを定義
+    networks:
+        # Default_Network
+        - default
+        # ユーザー定義の独自_Network
+        - industry_judgement_app_network
+# servicesと同じ階層(レベル)で、networks という項目を設定
+# Docker Compose環境が接続するNetworkを追加する
+networks:
+  industry_judgement_app_network:
+    # Networkの名前
+    name: industry_judgement_app_network
+    # external: true はdocker-composeで管理されていない外部のネットワークという意味
+    external: true
