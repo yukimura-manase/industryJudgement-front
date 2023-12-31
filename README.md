@@ -1,5 +1,11 @@
 # Industry Judgement App Front
 
+## App 概要
+
+1. 会社名と電話番号から、業種を判定するツールの FrontEnd
+
+2. 営業さんのサポートツール
+
 ## 環境構築方法(初期 setup)
 
 <br>
@@ -22,7 +28,7 @@ git clone git@github.com:yukimura-manase/industryJudgement-front.git
 frontend ディレクトリに移動して、パッケージを install する
 
 ```bash
-cd IndustryJudgement-front/frontend/ && yarn install
+cd industryJudgement-front/frontend/ && yarn install
 ```
 
 ### 3. docker-compose で Dockerfile から image をビルドする

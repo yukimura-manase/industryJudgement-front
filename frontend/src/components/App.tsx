@@ -18,11 +18,7 @@ import { parse } from "papaparse";
 import { industryStates } from "../store/Industry";
 import { useProxy } from "valtio/utils";
 import { Loading } from "./ui-parts/loading/Loading";
-import {
-  downloadCSV,
-  convertArrayToObjectList,
-  convertObjectListToCSV,
-} from "../utils/csv/csv";
+import { downloadCSV, convertObjectListToCSV } from "../utils/csv/csv";
 
 /** 行(Row)のDataType */
 interface JsonDataType {
@@ -105,7 +101,6 @@ const App = () => {
   const createIndustyCSV_2 = async () => {
     console.log("1つ1つ ChatGPTに業種判定をさせる処理");
     try {
-      // TODO: 「業種」CSVファイル作成処理
       if (csvFile) {
         // 1. FormData_Instanceを作成する
         // const formData = new FormData();
@@ -241,19 +236,6 @@ const App = () => {
       // 2. CSVファイルを Downloadする
 
       console.log("CSVファイル作成処理・Block");
-      console.log("元・Data Ver. All", industryStatesProxy.industryList);
-      console.log(
-        "元・Data Ver. レコードリスト",
-        industryStatesProxy.industryRecodeList
-      );
-
-      console.log("Debug");
-
-      /** CSVを作成するためのフォーマットに変換する */
-      // const convertResult = convertArrayToObjectList(
-      //   industryStatesProxy.industryList
-      // );
-      // console.log("convertResult", convertResult);
 
       /** CSVデータを作成 */
       const csvData = convertObjectListToCSV(
