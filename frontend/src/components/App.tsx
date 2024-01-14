@@ -98,10 +98,12 @@ const App = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   /** 1つ1つ ChatGPTに業種判定をさせる処理 */
-  const createIndustyCSV_2 = async () => {
+  const createIndustyCSV = async () => {
     console.log("1つ1つ ChatGPTに業種判定をさせる処理");
-    try {
-      if (csvFile) {
+
+    // CSV File が Setされている場合の処理
+    if (csvFile) {
+      try {
         // 1. FormData_Instanceを作成する
         // const formData = new FormData();
         // let csv = csvFile as Blob;
@@ -219,35 +221,37 @@ const App = () => {
             industryStatesProxy.industryList
           );
         }
-      } else {
-        alert("CSVファイルを選択してください。");
-      }
-    } catch (error) {
-      console.log("error", error);
-      alert(
-        `Errorが発生しました。
+      } catch (error) {
+        console.log("error", error);
+        alert(
+          `Errorが発生しました。
         \n 処理が完了しているところまでのCSVデータをDownloadします。
         \n Error内容: ${error}`
-      );
-    } finally {
-      // [ すべての処理が完了した後に、CSV を Download する ]
-      // 0. どこかで処理が失敗しても、処理が完了しているところまでの CSVデータを Downloadする
-      // 1. industryStatesProxy.industryList を CSV に変換する
-      // 2. CSVファイルを Downloadする
+        );
+      } finally {
+        // [ すべての処理が完了した後に、CSV を Download する ]
+        // 0. どこかで処理が失敗しても、処理が完了しているところまでの CSVデータを Downloadする
+        // 1. industryStatesProxy.industryList を CSV に変換する
+        // 2. CSVファイルを Downloadする
 
-      console.log("CSVファイル作成処理・Block");
+        console.log("CSVファイル作成処理・Block");
 
-      /** CSVデータを作成 */
-      const csvData = convertObjectListToCSV(
-        industryStatesProxy.industryRecodeList,
-        industryStatesProxy.industryColumnKeyList
-      );
-      console.log("csvData", csvData);
+        /** CSVデータを作成 */
+        const csvData = convertObjectListToCSV(
+          industryStatesProxy.industryRecodeList,
+          industryStatesProxy.industryColumnKeyList
+        );
+        console.log("csvData", csvData);
 
-      // CSV・Download
-      downloadCSV(csvData, "result");
-      // Loading終了
-      setIsLoading(false);
+        // CSV・Download
+        downloadCSV(csvData, "result");
+        // Loading終了
+        setIsLoading(false);
+      }
+    } else {
+      // CSV File が Setされていない場合は、Alertを表示して処理・終了
+      alert("CSVファイルを選択してください。");
+      return;
     }
   };
 
@@ -345,6 +349,61 @@ const App = () => {
     }
   };
 
+  /** 電話番号(会社の代表番号: 固定電話)から、会社名を判定したCSVファイルを作成する */
+  const phoneSerchCompany = async () => {
+    console.log("電話番号から、会社名を判定したCSVファイルを作成する");
+
+    // 電話番号から、会社名を特定して、CSVファイルを作成して、Downloadする
+    if (csvFile) {
+      // FormData_Instanceを作成する
+      const formData = new FormData();
+      let csv = csvFile as Blob;
+      // key: file
+      formData.append("file", csv);
+      console.log("formData", formData);
+      try {
+        // Flask-APIに、Post通信
+        const formResponse = await fetch(
+          "http://localhost:5001/api/phone_serch_company",
+          {
+            method: "POST", // HTTP-Methodを指定する！
+            body: formData, // リクエストボディーにフォームデータを設定
+          }
+        );
+        // Response.json() => 自動で、Parseされる
+        const parseDataList = await formResponse.json();
+        console.log("parseDataList", parseDataList);
+        console.log("parseDataList_typeof", typeof parseDataList);
+        // JsonDataをSetする
+        setJsonCsvData(parseDataList);
+        // CSV・Download
+      } catch (error) {
+        console.error(error);
+      } finally {
+        // [ すべての処理が完了した後に、CSV を Download する ]
+        // 0. どこかで処理が失敗しても、処理が完了しているところまでの CSVデータを Downloadする
+        // 1. industryStatesProxy.industryList を CSV に変換する
+        // 2. CSVファイルを Downloadする
+
+        console.log("CSVファイル作成処理・Block");
+
+        /** CSVデータを作成 */
+        // const csvData = convertObjectListToCSV(
+        //   industryStatesProxy.industryRecodeList,
+        //   industryStatesProxy.industryColumnKeyList
+        // );
+        // console.log("csvData", csvData);
+
+        // CSV・Download
+        // downloadCSV(csvData, "result");
+        // Loading終了
+        // setIsLoading(false);
+      }
+    } else {
+      alert("CSVファイルを選択してください。");
+    }
+  };
+
   /** 削除_Dialog */
   const [isOpenDeleteDialog, setIsOpenDeleteDialog] = useState<boolean>(false);
 
@@ -431,47 +490,6 @@ const App = () => {
 
           {/* Btn_Wrapper */}
           <div className="btn_wrapper">
-            {/* WordCloud作成-Btn */}
-            {isLoading ? (
-              <Button
-                variant="contained"
-                onClick={() => createIndustyCSV_2()}
-                sx={{
-                  mt: 3,
-                  mb: -1.5,
-                  padding: 0.5,
-                  width: "150px",
-                  backgroundColor: "#33dbae",
-                  fontWeight: "bold",
-                  "&:hover": {
-                    backgroundColor: "#3c52b2",
-                    color: "#fff",
-                  },
-                }}
-              >
-                <Loading />
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                onClick={() => createIndustyCSV_2()}
-                sx={{
-                  mt: 3,
-                  mb: -1.5,
-                  padding: 0.5,
-                  width: "150px",
-                  backgroundColor: "#33dbae",
-                  fontWeight: "bold",
-                  "&:hover": {
-                    backgroundColor: "#3c52b2",
-                    color: "#fff",
-                  },
-                }}
-              >
-                「業種」CSV作成
-              </Button>
-            )}
-
             {/* CSV_Info_Display_Btn */}
             <Button
               variant="contained"
@@ -492,10 +510,51 @@ const App = () => {
               CSVの中身を表示
             </Button>
 
-            {/* CSV_Info_Display_Btn */}
+            {/* WordCloud作成-Btn */}
+            {isLoading ? (
+              <Button
+                variant="contained"
+                onClick={() => createIndustyCSV()}
+                sx={{
+                  mt: 3,
+                  mb: -1.5,
+                  padding: 0.5,
+                  width: "150px",
+                  backgroundColor: "#33dbae",
+                  fontWeight: "bold",
+                  "&:hover": {
+                    backgroundColor: "#3c52b2",
+                    color: "#fff",
+                  },
+                }}
+              >
+                <Loading />
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                onClick={() => createIndustyCSV()}
+                sx={{
+                  mt: 3,
+                  mb: -1.5,
+                  padding: 0.5,
+                  width: "150px",
+                  backgroundColor: "#33dbae",
+                  fontWeight: "bold",
+                  "&:hover": {
+                    backgroundColor: "#3c52b2",
+                    color: "#fff",
+                  },
+                }}
+              >
+                「業種」CSV作成
+              </Button>
+            )}
+
+            {/* 電話番号から会社名を判定して、CSVを作成する */}
             {/* <Button
               variant="contained"
-              onClick={() => excelToCSV()}
+              onClick={() => phoneSerchCompany()}
               sx={{
                 mt: 3,
                 mb: -1.5,
@@ -509,7 +568,7 @@ const App = () => {
                 },
               }}
             >
-              ExcelをCSVに変換
+              電話番号で会社特定
             </Button> */}
           </div>
 
